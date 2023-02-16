@@ -5,7 +5,7 @@ function extractJson() {
 }
 
 function binDays2023() {
-  const data = {};
+  const data = [];
   const months = document.getElementsByClassName("widget-content");
   for (var month of months) {
     var datesAndValues = month.getElementsByTagName("li");
@@ -17,9 +17,12 @@ function binDays2023() {
       const monthIdx = monthFromStr(mn);
 
       const date = new Date(2023, monthIdx, dt);
-
       const millis = Date.parse(date);
-      data[millis] = binsFromText(rubbish);
+
+      data.push({
+        date: millis,
+        bins: binsFromText(rubbish),
+      });
     }
   }
   return data;
