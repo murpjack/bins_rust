@@ -1,5 +1,4 @@
-//use serde_json;
-//use std::fs;
+use serde_derive::{Deserialize, Serialize};
 use std::time::SystemTime;
 
 fn main() {
@@ -10,36 +9,81 @@ fn main() {
                 let bins_str = bin_day
                     .bins
                     .iter()
-                    .map(|s| String::from(what_bin_day(s)))
+                    .map(BinType::to_icon)
+                    .map(String::from)
                     .reduce(|cur: String, nxt| cur + &nxt)
                     .unwrap();
                 println!("Bin day! {}", bins_str);
             }
         }
-        Err(_) => panic!("Not today"),
+        Err(err) => panic!("Not today because {}", err),
     }
 }
 
-struct BinDay {
-    date: u128,
-    bins: [&'static str; 2],
+#[derive(Deserialize, Serialize, Debug, Clone)]
+enum BinType {
+    Biodegradable,
+    Landfill,
+    Recyclable,
+    NoBin,
 }
 
-fn get_data() -> Result<BinDay, &'static str> {
-    // TODO: Find and get data from json
-    //let input_path = "./bins.json";
-    //let _bin_data = {
-    //    let bin_data = std::fs::read_to_string(&input_path)?;
-    //    println!("{}", bin_data);
-    //    serde_json::from_str::<String>(&bin_data).unwrap();
-    //};
-
-    return Result::Ok({
-        BinDay {
-            date: 1678147200000,
-            bins: ["recycling", "food and garden waste"],
+impl BinType {
+    fn to_icon(&self) -> &str {
+        match self {
+            BinType::Recyclable => "♻️ ",
+            BinType::Biodegradable => "💩",
+            BinType::Landfill => "🗑",
+            BinType::NoBin => "",
         }
-    });
+    }
+
+    fn from_str(bin_str: &str) -> BinType {
+        match bin_str {
+            "recycling" => BinType::Recyclable,
+            "food and garden waste" => BinType::Biodegradable,
+            "rubbish" => BinType::Landfill,
+            _ => BinType::NoBin,
+        }
+    }
+}
+
+// TODO: On get_data, parse &'static str values as BinTypes
+#[derive(Deserialize, Serialize, Debug, Clone)]
+struct BinDay {
+    date: u128,
+    bins: Vec<BinType>,
+}
+
+fn get_data() -> Result<BinDay, String> {
+    // TODO: Parse data here
+    // TODO: Remove unwrap & handle errors
+    let bin_str = std::fs::read_to_string("src/bins.json").unwrap();
+    let raw_bin_days = serde_json::from_str::<serde_json::Value>(&bin_str).unwrap();
+
+    let bin_days = serde_json::from_value(raw_bin_days)
+        .iter()
+        .map(|raw_bin_day: &serde_json::Value| {
+            let raw_day: serde_json::Value = raw_bin_day.to_owned();
+            let dt: u128 = serde_json::from_value(raw_day.get("date").unwrap().to_owned()).unwrap();
+
+            let bins: Vec<serde_json::Value> = raw_day["bins"].as_array().unwrap().to_owned();
+
+            return BinDay {
+                date: dt,
+                bins: bins
+                    .iter()
+                    .map(|x| return x.as_str().unwrap())
+                    .map(|bin_str| BinType::from_str(bin_str))
+                    .collect::<Vec<BinType>>(),
+            };
+        })
+        .collect::<Vec<BinDay>>();
+
+    // TODO: This is always the first value in the list
+    let firsty: BinDay = bin_days.first().cloned().unwrap();
+
+    return Result::Ok(firsty);
 }
 
 fn is_bin_day_near(bin_day: u128) -> bool {
@@ -54,30 +98,5 @@ fn is_bin_day_near(bin_day: u128) -> bool {
             return bin_day >= today_start && bin_day < tomorrow_end;
         }
         Err(_) => panic!("SystemTime before UNIX EPOCH!"),
-    }
-}
-
-enum BinType {
-    Biodegradable,
-    Landfill,
-    Recyclable,
-    NoBin,
-}
-
-fn what_bin_day(s: &str) -> &str {
-    match s {
-        "recycling" => to_icon(BinType::Recyclable),
-        "food and garden waste" => to_icon(BinType::Biodegradable),
-        "rubbish" => to_icon(BinType::Landfill),
-        _ => to_icon(BinType::NoBin),
-    }
-}
-
-fn to_icon(bin_type: BinType) -> &'static str {
-    match bin_type {
-        BinType::Recyclable => "♻️ ",
-        BinType::Biodegradable => "💩",
-        BinType::Landfill => "🗑",
-        BinType::NoBin => "",
     }
 }
