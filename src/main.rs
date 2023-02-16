@@ -1,4 +1,5 @@
 use serde_derive::{Deserialize, Serialize};
+use serde_json;
 use std::time::SystemTime;
 
 fn main() {
@@ -48,7 +49,6 @@ impl BinType {
     }
 }
 
-// TODO: On get_data, parse &'static str values as BinTypes
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct BinDay {
     date: u128,
@@ -61,12 +61,14 @@ fn get_data() -> Result<BinDay, String> {
     let bin_str = std::fs::read_to_string("src/bins.json").unwrap();
     let raw_bin_days = serde_json::from_str::<serde_json::Value>(&bin_str).unwrap();
 
-    let bin_days = serde_json::from_value(raw_bin_days)
+    let bin_days = raw_bin_days
+        .as_array()
+        .unwrap()
         .iter()
         .map(|raw_bin_day: &serde_json::Value| {
             let raw_day: serde_json::Value = raw_bin_day.to_owned();
-            let dt: u128 = serde_json::from_value(raw_day.get("date").unwrap().to_owned()).unwrap();
-
+            let not_raw = raw_day.as_object().unwrap().to_owned();
+            let dt: u128 = (not_raw["date"].as_str().unwrap()).parse().unwrap();
             let bins: Vec<serde_json::Value> = raw_day["bins"].as_array().unwrap().to_owned();
 
             return BinDay {
