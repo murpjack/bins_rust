@@ -7,7 +7,7 @@ endif
 let s:Show = 'show'
 
 " The path to the binary that was created out of 'cargo build' or 'cargo build --release". This will generally be 'target/release/name'
-let s:bin = 'target/debug/bins_rust'
+let s:bin = 'target/release/bins_rust'
 
 " Entry point. Initialize RPC. If it succeeds, then attach commands to the `rpcnotify` invocations.
 function! s:connect()
@@ -26,7 +26,6 @@ function! s:connect()
 endfunction
 
 function! s:configureCommands()
-  " command! -nargs=0 SpotifyCurrentSong :call s:rpc(s:CurrentSong)
   command! BinDay :call s:show()
 endfunction
 

@@ -1,8 +1,12 @@
 extern crate neovim_lib;
 use neovim_lib::{Neovim, NeovimApi, Session};
-
 use serde_derive::{Deserialize, Serialize};
 use std::time::SystemTime;
+
+fn main() {
+    let mut event_handler = EventHandler::new();
+    event_handler.recv();
+}
 
 enum Messages {
     Show,
@@ -51,11 +55,6 @@ impl EventHandler {
             }
         }
     }
-}
-
-fn main() {
-    let mut event_handler = EventHandler::new();
-    event_handler.recv();
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
