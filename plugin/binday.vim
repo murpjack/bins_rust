@@ -7,7 +7,7 @@ endif
 let s:Show = 'show'
 
 " The path to the binary that was created out of 'cargo build' or 'cargo build --release". This will generally be 'target/release/name'
-let s:bin = '~/.config/nvim/vim-plug/bins_rust/target/debug/bins_rust'
+let s:bin = 'target/debug/bins_rust'
 
 " Entry point. Initialize RPC. If it succeeds, then attach commands to the `rpcnotify` invocations.
 function! s:connect()
@@ -27,10 +27,10 @@ endfunction
 
 function! s:configureCommands()
   " command! -nargs=0 SpotifyCurrentSong :call s:rpc(s:CurrentSong)
-  command! -nargs=+ BinDay :call s:show(<f-args>)
+  command! BinDay :call s:show()
 endfunction
 
-function! s:show(...)
+function! s:show()
    call rpcnotify(s:bindayJobId, s:Show)
 endfunction
 

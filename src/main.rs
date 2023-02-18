@@ -39,9 +39,7 @@ impl EventHandler {
             match Messages::from(event) {
                 Messages::Show => {
                     let print = &self.bin_day;
-                    self.nvim
-                        .command(&format!("echo \"Sum: {}\"", print))
-                        .unwrap();
+                    self.nvim.command(&format!("echo \"{}\"", print)).unwrap();
                 }
 
                 // Handle anything else
@@ -115,7 +113,7 @@ impl BinDay {
                 Some(date_str) => {
                     let date = date_str.parse::<u128>().unwrap();
                     // TODO: Remove this '!' otherwise print first date in json file
-                    if !BinDay::is_near(date) {
+                    if BinDay::is_near(date) {
                         return BinDay::from_value(raw_day);
                     } else {
                         return None;
@@ -127,9 +125,9 @@ impl BinDay {
         match bin_day {
             Some(today) => {
                 let icons = BinDay::bins_to_icons(&today);
-                return icons + " Bin day!";
+                return format!("{} {}", String::from("Bin day!"), icons);
             }
-            _ => panic!("Not today"),
+            _ => format!("Keep calm. It's not bin day today or tomorrow"),
         }
     }
 }
