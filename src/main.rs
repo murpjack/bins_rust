@@ -1,8 +1,7 @@
 extern crate neovim_lib;
 use neovim_lib::{Neovim, NeovimApi, Session};
 use serde_derive::{Deserialize, Serialize};
-use std::time::SystemTime;
-
+use std::time::{Duration, SystemTime};
 fn main() {
     let mut event_handler = EventHandler::new();
     event_handler.recv();
@@ -73,15 +72,18 @@ impl BinDay {
     }
 
     fn is_near(next_date: u128) -> bool {
-        let one_day = 72000000;
+        let day_secs = Duration::new(((1000 * 60) * 60) * 24, 0); // 86400000;
         match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
-            Ok(n) => {
+            Ok(now) => {
                 // TODO: today_start should == today at 12am
                 // TODO: tomorrow_end should == tomorrow at 11.59pm
-                let now = n.as_millis();
-                let today_start = now - (one_day / 2);
-                let tomorrow_end = now + one_day;
-                next_date >= today_start && next_date < tomorrow_end
+                match (now.checked_sub(day_secs), now.checked_add(day_secs * 2)) {
+                    (Some(today_start), Some(tomorrow_end)) => {
+                        let nexty = Duration::from_millis(next_date.try_into().unwrap());
+                        (today_start..tomorrow_end).contains(&nexty)
+                    }
+                    _ => false,
+                }
             }
             Err(_) => panic!("SystemTime before UNIX EPOCH!"),
         }
@@ -111,7 +113,6 @@ impl BinDay {
             .find_map(|raw_day| match raw_day["date"].as_str() {
                 Some(date_str) => {
                     let date = date_str.parse::<u128>().unwrap();
-                    // TODO: Remove this '!' otherwise print first date in json file
                     if BinDay::is_near(date) {
                         return BinDay::from_value(raw_day);
                     } else {
