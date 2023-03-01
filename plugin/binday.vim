@@ -7,7 +7,8 @@ endif
 let s:Show = 'show'
 
 " The path to the binary that was created out of 'cargo build' or 'cargo build --release". This will generally be 'target/release/name'
-let s:bin = "/target/release/bins_rust"
+let s:scriptdir = resolve(expand('<sfile>:p:h') . '/..')
+let s:bin = s:scriptdir . "/target/release/bins_rust"
 
 " Entry point. Initialize RPC. If it succeeds, then attach commands to the `rpcnotify` invocations.
 function! s:connect()
@@ -35,6 +36,7 @@ endfunction
 
 " Initialize RPC
 function! s:initRpc()
+  echo s:bin
   if s:bindayJobId == 0
     let jobid = jobstart([s:bin], { 'rpc': v:true })
     return jobid
