@@ -31,6 +31,7 @@ function! s:configureCommands()
 endfunction
 
 function! s:show()
+   echo s:bindayJobId
    call rpcnotify(s:bindayJobId, s:Show)
 endfunction
 
