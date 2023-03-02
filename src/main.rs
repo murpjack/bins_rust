@@ -104,7 +104,7 @@ impl BinDay {
 
     fn print() -> String {
         // TODO: Remove unwrap & handle errors -- Implement and_then for serde_json::Results
-        let bin_str = std::fs::read_to_string("src/bins.json").unwrap();
+        let bin_str = std::fs::read_to_string("./bins.json").unwrap();
         let bin_day = serde_json::from_str::<serde_json::Value>(&bin_str)
             .unwrap()
             .as_array()
