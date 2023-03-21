@@ -16,4 +16,5 @@ As a result I wrote a quick & dirty script to scrape from the council website.
 * Integrate with Vim, as this is not currently implemented.
 * Make this plugin better for other users 
   - ie reshape data to be easier to understand, compatible with other bin data & types 
+  - Create an install.sh script and/or build bin files to be executed on Mac, Linux, Windows 
  
